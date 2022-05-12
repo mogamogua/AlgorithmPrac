@@ -27,3 +27,25 @@ function postfix(expression) {
 
 const expression = "352+*9-";
 console.log(postfix(expression));
+
+
+//해답
+function solution(expression){  
+  let answer;
+  let stack=[];
+  for (let x of expression) {
+    if (!isNaN(x)) stack.push(Number(x));
+    else {//연산식일 때
+      let right = stack.pop(), left=stack.pop();
+      if (x === "+") stack.push(left+right);
+      else if (x === "-") stack.push(left-right);
+      else if (x === "*") stack.push(left*right);
+      else if (x === "/") stack.push(left/right);
+    }
+  }
+
+  answer=stack[0];
+  return answer;
+}
+//여기서는 stack하나로 연산하고있다. 연산 결과를 stack에 추가함으로써 후위연산을 이어서할 수 있다.
+// eval을 사용하지 않고, if문으로 연산식을 구분하여 연산하고 있다.
