@@ -9,22 +9,23 @@
 
 //S단어에 T문자열과 아나그램이 되는 부분문자열의 개수 출력
 
+function strCountToMap(string) {
+  const map = new Map();
+  for (let elem of string) {
+    if (map.has(elem)) map.set(elem, map.get(elem)+1);
+    //map.get(elem) !== undefined 대신 map.has(elem)으로 작성할 수 있다.
+    else map.set(elem, 1);
+  }
+  return map;
+}
+
 function countAnagrams(S, T) {
   let answer = 0;
-  const tMap = new Map();
-
-  for (let elem of T) {
-    if(tMap.get(elem) !== undefined) tMap.set(elem, tMap.get(elem)+1);
-    else tMap.set(elem, 1);
-  }
+  const tMap = strCountToMap(T);
   const wordLen = tMap.size
   for (let i=0; i+wordLen<=S.length; i++) {
     let j = i+wordLen;
-    const sMap = new Map();
-    [...S.slice(i, j)].forEach((elem) =>{
-      if (sMap.get(elem) !== undefined) sMap.set(elem, sMap.get(elem)+1);
-      else sMap.set(elem, 1);
-    })
+    const sMap = strCountToMap(S.slice(i, j))
 
     if (sMap.size !== tMap.size) continue;
     
@@ -37,37 +38,54 @@ function countAnagrams(S, T) {
   }
   return answer;
 }
-  
-//무한루프..ㅠ
-// function countAnagram(S, T) {
-//   const count = new Map();
-//   for (let alphabet of T) {
-//     if (count.has(alphabet)) count.set(alphabet,count.get(alphabet)+1);
-//     else count.set(alphabet, 1);
-//   }
-//   let answer = 0;
-//   let i = 0, j = i-1+count.size
-//   while (i < S.length && j < S.length) {
-//     let answerStr = '';
-//     for (index in S.slice(i,j)) {
-//       if (!count.has(S[i+index]) || count.get(S[i+index]) == 0) {
-//         i = S.indexOf(S[i+index], i+index) + 1;   
-//         j = i + count.size - 1     
-//         break;
-//       } else {
-//         count.set(S[i+index], count.get(S[i+index])-1);
-//         answerStr += S[i+index];
-//         if (answerStr.length === count.size) {
-//           ++i;
-//           ++j;
-//           ++answer;
-//           break;
-//         }
-//       }
-//     }
-//   }
-//   return answer;
-// }
 
 const S = 'bacaAacba', T = 'abc';
-console.log(countAnagrams(S, T));
+// console.log(countAnagrams(S, T));
+
+
+
+
+
+//solution
+function compareMaps(map1, map2) { //두 맵을 비교하여 아나그램인지 판별하는 함수
+  if (map1.size !== map2.size) return false;//두 맵 크기가 다르면 아나그램이 아니다.
+  for (let [key, val] of map1) {
+    if (!map2.has(key) || map2.get(key)!==val) return false; //map2의 key(문자)가 없거나, 나온 회수가 다른경우 아나그램이 아니다.
+  }
+  return true; // 위의 조건에서 false가 아닌경우 아나그램이다.
+}
+
+function strToMap(string) {
+  const map = new Map();
+  for (let elem of string) {
+    if (map.has(elem)) map.set(elem, map.get(elem)+1);
+    else map.set(elem, 1);
+  }
+  return map;
+}
+ 
+function solution(S, T) {
+  let answer = 0;
+  let tMap = strToMap(T);
+  let wordLen = T.length-1;
+
+
+  let i =0;
+  let sMap = strToMap(S.slice(i, i+wordLen));
+  console.log(sMap, '초기sMap')
+
+  let left=0;
+  for (let right=wordLen; right<S.length; right++) {
+    if (sMap.has(S[right])) sMap.set(S[right], sMap.get(S[right])+1);
+    else sMap.set(S[right], 1);
+    if (compareMaps(sMap, tMap)) answer++ // 두 맵을 비교했을 때 아나그램이면 +1
+    
+    sMap.set(S[left], sMap.get(S[left])-1); //left를 오르쪽으로 옮기기 위해 기존 맵에서 해당 value-1한다.
+    if(sMap.get(S[left])===0) sMap.delete(S[left]); //지우고 나서 0이되면 아예 해당 key를 없앤다(size에영향을 주므로)
+    left++; //left를 오르쪽으로 옮긴다.right는 for문에 의해 오른쪽으로
+    console.log(sMap)
+  }
+  return answer;
+}
+
+console.log(solution(S, T), 'solution');
